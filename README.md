@@ -1,15 +1,15 @@
-# Unitree Go1 — T1 и T2
+# Unitree Go1 — T1, T2 и T4
 
-Решение команды 5-HT2A COLLECTIVE для заочного этапа. Контейнер поддерживает `ping` и `T2`. Узел T2 читает `/lowcmd_bare` и публикует проверенные команды в `/lowcmd`.
+Решение команды 5-HT2A COLLECTIVE для заочного этапа. Контейнер поддерживает `ping`, `T2` и `T4`. Узел T2 читает `/lowcmd_bare` и публикует проверенные команды в `/lowcmd`.
 
 ## Сборка и проверка
 
 ```bash
-docker buildx build --platform linux/amd64 --load -t 5ht2a-go1:t2 .
-python3 verify.py 5ht2a-go1:t2
+docker buildx build --platform linux/amd64 --load -t 5ht2a-go1:t4 .
+python3 verify.py 5ht2a-go1:t4
 ```
 
-В выводе ожидаются `offline ping OK`, `Tasks: T2` и UID 10001. Сеть нужна для сборки. Если Docker требует прав администратора, добавьте `sudo` к обеим командам.
+В выводе ожидаются `offline ping OK`, `Tasks: T2, T4` и UID 10001. Сеть нужна для сборки. Если Docker требует прав администратора, добавьте `sudo` к обеим командам.
 
 Для проверки ROS 2 запустите из каталога официального симулятора:
 
@@ -17,7 +17,7 @@ python3 verify.py 5ht2a-go1:t2
 docker pull --platform linux/amd64 registry.cookcloud.ru/go1-hackathon-remote-stage/go1-sim:v1.0
 python3 run_local.py --task T2 --headless --logs \
   --sim-image registry.cookcloud.ru/go1-hackathon-remote-stage/go1-sim:v1.0 \
-  --participant-image 5ht2a-go1:t2
+  --participant-image 5ht2a-go1:t4
 ```
 
 Для просмотра движения используйте `--gui` вместо `--headless`. В публичном запуске поток тестовых целей нужно подать самостоятельно в `/lowcmd_bare`.
@@ -29,3 +29,22 @@ python3 run_local.py --task T2 --headless --logs \
 - Если команда опасна, узел продолжает отправлять последнюю безопасную цель. Через 400 мс без входа скорость и добавочный момент обнуляются.
 
 Модель и таблица взяты из [публичного симулятора](https://github.com/Urika000/go1-simulator-public/tree/3473f086fd8a111592b4b9d822500c79f20c811a/models/mujoco/unitree_go1). Версия пакета [unitree_go](https://github.com/unitreerobotics/unitree_ros2/tree/668d1ec5a05d1c38d3306bdca7d59f2ba3581a88/cyclonedds_ws/src/unitree/unitree_go) совпадает с версией симулятора. Лицензии лежат в `vendor/`.
+
+## T4 — одометрия
+
+`/entrypoint.sh T4` запускает оценку смещения по лидару и ориентации по IMU.
+Выходы — `/odom` и преобразование `odom → trunk` в `/tf`, с одной позой и меткой времени.
+Позиция оценивается в плоскости XY, высота фиксирована в нуле. Команды движения
+подаёт симулятор или судья. Узел не использует траекторию команд и истинную позу.
+
+Соберите образ и проверьте, что `verify.py` показывает `Tasks: T2, T4`.
+Из каталога публичного симулятора запустите:
+
+```bash
+python3 run_local.py --task T4 --headless --logs \
+  --sim-image registry.cookcloud.ru/go1-hackathon-remote-stage/go1-sim:v1.0 \
+  --participant-image 5ht2a-go1:t4
+```
+
+В логе ожидайте `T4 ready`. Для проверки точности требуется прогон с движением
+и эталонной траекторией в публичном симуляторе.
