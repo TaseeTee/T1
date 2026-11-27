@@ -28,7 +28,7 @@ COPY vendor/go1-model/ ./vendor/go1-model/
 COPY manifest.py ./manifest.py
 COPY tasks/ ./tasks/
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod 755 /entrypoint.sh /opt/participant/tasks/T2 /opt/participant/tasks/T4 \
+RUN chmod 755 /entrypoint.sh /opt/participant/tasks/T2 /opt/participant/tasks/T3 /opt/participant/tasks/T4 \
     && bash -ec 'source /opt/ros/humble/setup.bash; source /opt/unitree_interfaces/local_setup.bash; python3 -c "import mujoco; from unitree_go.msg import LowCmd, LowState; assert len(LowCmd().motor_cmd) == len(LowState().motor_state) == 20"'
 
 USER participant

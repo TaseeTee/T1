@@ -2,8 +2,8 @@ import json
 import os
 from pathlib import Path
 
-T3_SPEED_MPS = None
-T3_SELF_TRAINED = False
+T3_SPEED_MPS = 0.22
+T3_SELF_TRAINED = True
 
 tasks_dir = Path(__file__).resolve().parent / "tasks"
 tasks = []
